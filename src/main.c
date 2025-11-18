@@ -16,6 +16,7 @@ typedef struct {
 	Vector2 velocity;
 	Rectangle bounds;
 	bool isGrounded;
+	float playerJumpPower;
 } Player;
 
 typedef struct {
@@ -40,14 +41,15 @@ int main ()
 		(Vector2){50.0f, 50.0f},
 		(Vector2) {0.0f, 0.0f},
 		(Rectangle) {50.0f, 50.0f, 30.0f, 60.0f},
-		false
+		false,
+		500.0f
 	};
 
 	Platform platform = { (Rectangle) {0.0f, 400.0f, 800.0f, 50.0f}};
 
-	float playerSpeed = 10.0f;
+	float playerSpeed = 300.0f;
 
-	float gravity = 0.2f;
+	float gravity = 900.0f;
 	bool useGravity = true;
 	bool pause = 0;
 
@@ -56,11 +58,26 @@ int main ()
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		float deltaTime = GetFrameTime();
+		player.velocity.x = 0.0f;
+		player.velocity.y += gravity * deltaTime;
+
 		if (IsKeyPressed(KEY_SPACE)) pause = !pause;
 
 		if (!pause) {
-			player.velocity.y += gravity;
-			player.position.y += player.velocity.y;
+			if (IsKeyDown(KEY_D)) {
+				player.velocity.x = playerSpeed;
+			}
+			if (IsKeyDown(KEY_A)) {
+				player.velocity.x = -playerSpeed;
+			}
+			if (IsKeyDown(KEY_W) && player.isGrounded) {
+				player.velocity.y = -player.playerJumpPower;
+				player.isGrounded = false;
+			}
+
+			player.position.y += player.velocity.y * deltaTime;
+			player.position.x += player.velocity.x * deltaTime;
 
 			player.bounds.y = player.position.y;
 			player.bounds.x = player.position.x;
@@ -70,19 +87,15 @@ int main ()
 				Rectangle overlap = GetCollisionRec(player.bounds, platform.bounds);
 
 				if (player.bounds.y < platform.bounds.y) {
-
 					player.position.y -= overlap.height;
-
 					player.velocity.y = 0;
-
 					player.isGrounded = true;
 				}
 
-			} else {
+			} 
 
-				if (IsKeyPressed(KEY_D)) player.velocity.x +=	
 
-			}
+
 		}
 		// drawing
 		BeginDrawing();
